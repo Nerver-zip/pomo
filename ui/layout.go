@@ -73,7 +73,7 @@ func (m *Model) buildStatusIndicators() string {
 	}
 
 	if m.activeTask != nil {
-		indicators += fmt.Sprintf(" · task: %d 🍅", m.activeTask.TotalPomodoros)
+		indicators += fmt.Sprintf(" · task: %d", m.activeTask.TotalPomodoros)
 	}
 
 	if m.sessionState == Paused {

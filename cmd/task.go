@@ -88,7 +88,7 @@ var taskListCmd = &cobra.Command{
 		fmt.Fprintln(w, "ID\tSTATUS\tPOMODOROS\tFOCUSED\tTITLE")
 
 		for _, t := range tasks {
-			pomodorosStr := fmt.Sprintf("%d 🍅", t.TotalPomodoros)
+			pomodorosStr := strconv.Itoa(t.TotalPomodoros)
 			focusedStr := formatDuration(t.TotalDuration)
 			fmt.Fprintf(w, "#%d\t%s\t%s\t%s\t%s\n", t.ID, t.Status, pomodorosStr, focusedStr, t.Title)
 		}

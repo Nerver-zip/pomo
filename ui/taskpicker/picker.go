@@ -180,7 +180,7 @@ func (m Model) View() string {
 
 			metrics := ""
 			if t.TotalPomodoros > 0 {
-				metrics = dimStyle.Render(fmt.Sprintf(" (%d 🍅 · %s)", t.TotalPomodoros, formatDuration(t.TotalDuration)))
+				metrics = dimStyle.Render(fmt.Sprintf(" (%d · %s)", t.TotalPomodoros, formatDuration(t.TotalDuration)))
 			}
 
 			line := fmt.Sprintf("[%d] %s%s%s", t.ID, t.Title, activeBadge, metrics)
