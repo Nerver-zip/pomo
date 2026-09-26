@@ -47,6 +47,12 @@ func init() {
 		"",
 		"work session title",
 	)
+	rootCmd.Flags().IntP(
+		"task",
+		"T",
+		0,
+		"attach a persistent task by ID",
+	)
 
 	initLogging()
 	initConfig()
