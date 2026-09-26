@@ -27,6 +27,8 @@ type TaskCompletedMsg struct {
 	Task db.Task
 }
 
+type TaskUntrackedMsg struct{}
+
 type ClosePickerMsg struct{}
 
 var (
@@ -138,6 +140,11 @@ func (m *Model) HandleKeys(msg tea.KeyMsg) tea.Cmd {
 			}
 		}
 		return nil
+
+	case key.Matches(msg, Keys.Untrack):
+		return func() tea.Msg {
+			return TaskUntrackedMsg{}
+		}
 
 	case key.Matches(msg, Keys.Close):
 		return func() tea.Msg {

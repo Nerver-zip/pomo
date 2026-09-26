@@ -8,6 +8,7 @@ import (
 	"github.com/Nerver-zip/pomo-tasker/config"
 	"github.com/Nerver-zip/pomo-tasker/db"
 	"github.com/Nerver-zip/pomo-tasker/ui/taskpicker"
+	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
@@ -171,4 +172,131 @@ func TestTimer_TaskPicker_OpeningAndSelection(t *testing.T) {
 	require.NotNil(t, m.ActiveTask())
 	assert.Equal(t, t1.ID, m.ActiveTask().ID)
 	assert.Equal(t, "Task Alpha", m.ActiveTask().Title)
+}
+
+func TestTimer_SeparateTimersAndSwitchingWithoutSharingTime(t *testing.T) {
+	database := newTestDB(t)
+	cfg := testConfig()
+
+	taskRepo := db.NewTaskRepo(database)
+	t1, err := taskRepo.Create("Task One", "First task with dedicated timer")
+	require.NoError(t, err)
+	t2, err := taskRepo.Create("Task Two", "Second task with dedicated timer")
+	require.NoError(t, err)
+
+	m := NewModelWithDB(config.WorkTask, cfg, database)
+	m.handleWindowResize(tea.WindowSizeMsg{Width: 100, Height: 30})
+	m.SetInitialTask(t1)
+
+	// 1. Work 10 minutes on Task One
+	m.elapsed = 10 * time.Minute
+	m.timer.Timeout = 15 * time.Minute
+
+	// 2. Switch to Task Two
+	newModel, _ := m.Update(taskpicker.TaskSelectedMsg{Task: *t2})
+	m = newModel.(Model)
+
+	// Verify Task One's 10m was committed to the DB
+	var t1Sessions []db.Session
+	err = database.Select(&t1Sessions, "SELECT id, task_id, duration FROM sessions WHERE task_id = ?;", t1.ID)
+	require.NoError(t, err)
+	require.Len(t, t1Sessions, 1)
+	assert.Equal(t, 10*time.Minute, t1Sessions[0].Duration)
+
+	// Verify Task Two starts with its OWN separate timer (25:00, 0 elapsed)
+	require.NotNil(t, m.ActiveTask())
+	assert.Equal(t, t2.ID, m.ActiveTask().ID)
+	assert.Equal(t, 0*time.Minute, m.elapsed, "Task Two must start with 0 elapsed time")
+	assert.Equal(t, 25*time.Minute, m.duration)
+	assert.Equal(t, 25*time.Minute, m.timer.Timeout, "Task Two must have its own fresh 25m countdown")
+
+	// 3. Work 5 minutes on Task Two
+	m.elapsed = 5 * time.Minute
+	m.timer.Timeout = 20 * time.Minute
+
+	// 4. Switch back to Task One
+	newModel, _ = m.Update(taskpicker.TaskSelectedMsg{Task: *t1})
+	m = newModel.(Model)
+
+	// Verify Task Two's 5m was committed to the DB
+	var t2Sessions []db.Session
+	err = database.Select(&t2Sessions, "SELECT id, task_id, duration FROM sessions WHERE task_id = ?;", t2.ID)
+	require.NoError(t, err)
+	require.Len(t, t2Sessions, 1)
+	assert.Equal(t, 5*time.Minute, t2Sessions[0].Duration)
+
+	// Verify Task One's timer was restored to 15m remaining!
+	require.NotNil(t, m.ActiveTask())
+	assert.Equal(t, t1.ID, m.ActiveTask().ID)
+	assert.Equal(t, 10*time.Minute, m.elapsed, "Task One's elapsed progress must be restored")
+	assert.Equal(t, 15*time.Minute, m.timer.Timeout, "Task One must resume with 15m remaining")
+
+	// 5. Work remaining 15 minutes on Task One and complete
+	m.elapsed = 25 * time.Minute
+	m.recordSession()
+
+	// 6. Verify full DB history: Task One = 25m total, Task Two = 5m total. No shared time!
+	stats1, err := taskRepo.GetTaskStats(t1.ID)
+	require.NoError(t, err)
+	assert.Equal(t, 25*time.Minute, stats1.TotalDuration)
+
+	stats2, err := taskRepo.GetTaskStats(t2.ID)
+	require.NoError(t, err)
+	assert.Equal(t, 5*time.Minute, stats2.TotalDuration)
+}
+
+func TestTimer_NoAcceleratedTicksOnPauseResumeOrPicker(t *testing.T) {
+	database := newTestDB(t)
+	cfg := testConfig()
+
+	m := NewModelWithDB(config.WorkTask, cfg, database)
+	m.handleWindowResize(tea.WindowSizeMsg{Width: 100, Height: 30})
+
+	// 1. Initial tick decrements by 1s
+	newModel, _ := m.Update(timer.TickMsg{ID: m.timer.ID()})
+	m = newModel.(Model)
+	assert.Equal(t, 1*time.Second, m.elapsed)
+	assert.Equal(t, 25*time.Minute-1*time.Second, m.timer.Timeout)
+
+	// 2. Pause with Space
+	newModel, _ = m.Update(tea.KeyMsg{Type: tea.KeySpace})
+	m = newModel.(Model)
+	assert.Equal(t, Paused, m.State())
+
+	// 3. Ticks arriving while paused must be rejected (not advanced)
+	newModel, _ = m.Update(timer.TickMsg{ID: m.timer.ID()})
+	m = newModel.(Model)
+	assert.Equal(t, 1*time.Second, m.elapsed, "elapsed must not advance while paused")
+	assert.Equal(t, 25*time.Minute-1*time.Second, m.timer.Timeout)
+
+	// 4. Resume with Space
+	newModel, _ = m.Update(tea.KeyMsg{Type: tea.KeySpace})
+	m = newModel.(Model)
+	assert.Equal(t, Running, m.State())
+
+	// 5. Open Task Picker with 't'
+	newModel, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'t'}})
+	m = newModel.(Model)
+	assert.Equal(t, ShowingTaskPicker, m.State())
+
+	// 6. Ticks arriving while in picker must be rejected (timer is stopped)
+	newModel, _ = m.Update(timer.TickMsg{ID: m.timer.ID()})
+	m = newModel.(Model)
+	assert.Equal(t, 1*time.Second, m.elapsed, "elapsed must not advance while in picker")
+
+	// 7. Close picker with ClosePickerMsg
+	newModel, _ = m.Update(taskpicker.ClosePickerMsg{})
+	m = newModel.(Model)
+	assert.Equal(t, Running, m.State())
+
+	// 8. Subsequent valid tick advances exactly 1s, never 2x
+	newModel, _ = m.Update(timer.TickMsg{ID: m.timer.ID()})
+	m = newModel.(Model)
+	assert.Equal(t, 2*time.Second, m.elapsed)
+	assert.Equal(t, 25*time.Minute-2*time.Second, m.timer.Timeout)
+
+	// 9. Stale tick from mismatched timer ID is rejected
+	newModel, _ = m.Update(timer.TickMsg{ID: 999999})
+	m = newModel.(Model)
+	assert.Equal(t, 2*time.Second, m.elapsed, "stale tick from different timer ID must be ignored")
 }

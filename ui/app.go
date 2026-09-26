@@ -42,10 +42,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.handleCommandsDone()
 
 	case taskpicker.TaskSelectedMsg:
-		m.activeTask = &msg.Task
-		m.sessionSummary.SetFocusedTask(msg.Task.ID, msg.Task.Title)
+		cmd := m.switchTask(&msg.Task)
 		m.sessionState = m.prevState
-		return m, nil
+		return m, cmd
+
+	case taskpicker.TaskUntrackedMsg:
+		cmd := m.switchTask(nil)
+		m.sessionState = m.prevState
+		return m, cmd
 
 	case taskpicker.OpenNewTaskFormMsg:
 		m.form = taskform.NewForCreate()
@@ -62,16 +66,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case taskpicker.TaskCompletedMsg:
 		if m.taskRepo != nil {
 			_ = m.taskRepo.Complete(msg.Task.ID)
+			delete(m.taskTimers, msg.Task.ID)
+			var cmd tea.Cmd
 			if m.activeTask != nil && m.activeTask.ID == msg.Task.ID {
-				m.activeTask = nil
+				cmd = m.switchTask(nil)
 			}
 			tasks, _ := m.taskRepo.ListPending()
 			m.picker.SetTasks(tasks)
+			return m, cmd
 		}
 		return m, nil
 
 	case taskpicker.ClosePickerMsg:
 		m.sessionState = m.prevState
+		if m.sessionState == Running {
+			return m, m.timer.Start()
+		}
 		return m, nil
 
 	case taskform.TaskFormSubmitMsg:
@@ -86,18 +96,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				tasks, _ := m.taskRepo.ListPending()
 				m.picker.SetTasks(tasks)
 				m.sessionState = ShowingTaskPicker
+				return m, nil
 			} else {
 				task, err := m.taskRepo.Create(msg.Title, msg.Description)
+				var cmd tea.Cmd
 				if err == nil {
-					m.activeTask = task
-					m.sessionSummary.SetFocusedTask(task.ID, task.Title)
+					cmd = m.switchTask(task)
 				}
 				m.sessionState = m.prevState
+				return m, cmd
 			}
 		} else {
 			m.sessionState = m.prevState
+			if m.sessionState == Running {
+				return m, m.timer.Start()
+			}
+			return m, nil
 		}
-		return m, nil
 
 	case taskform.CloseFormMsg:
 		m.sessionState = ShowingTaskPicker

@@ -11,6 +11,7 @@ type KeyMap struct {
 	New      key.Binding
 	Edit     key.Binding
 	Complete key.Binding
+	Untrack  key.Binding
 	Close    key.Binding
 }
 
@@ -20,6 +21,7 @@ func (k KeyMap) ShortHelp() []key.Binding {
 		k.New,
 		k.Edit,
 		k.Complete,
+		k.Untrack,
 		k.Close,
 	}
 }
@@ -55,6 +57,10 @@ var Keys = KeyMap{
 	Complete: key.NewBinding(
 		key.WithKeys("c"),
 		key.WithHelp("c", "done"),
+	),
+	Untrack: key.NewBinding(
+		key.WithKeys("u"),
+		key.WithHelp("u", "untrack"),
 	),
 	Close: key.NewBinding(
 		key.WithKeys("esc", "q", "t"),

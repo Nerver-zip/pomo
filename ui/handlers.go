@@ -58,14 +58,17 @@ func (m *Model) handleKeys(msg tea.KeyMsg) tea.Cmd {
 				m.picker.HandleWindowResize(tea.WindowSizeMsg{Width: m.width, Height: m.height})
 				m.prevState = m.sessionState
 				m.sessionState = ShowingTaskPicker
+				return m.timer.Stop()
 			}
 		}
 		return nil
 
 	case key.Matches(msg, keyMap.Complete):
 		if m.activeTask != nil && m.taskRepo != nil {
-			_ = m.taskRepo.Complete(m.activeTask.ID)
-			m.activeTask = nil
+			taskID := m.activeTask.ID
+			_ = m.taskRepo.Complete(taskID)
+			delete(m.taskTimers, taskID)
+			return m.switchTask(nil)
 		}
 		return nil
 
@@ -76,20 +79,29 @@ func (m *Model) handleKeys(msg tea.KeyMsg) tea.Cmd {
 	case key.Matches(msg, keyMap.Pause):
 		if m.sessionState == Paused {
 			m.sessionState = Running
+			return m.timer.Start()
 		} else if m.getPercent() != 1.0 { // prevent pausing if session is already completed
 			m.sessionState = Paused
-		}
-
-		if m.sessionState == Running {
-			return m.timer.Start()
+			return m.timer.Stop()
 		}
 
 		return nil
 
 	case key.Matches(msg, keyMap.Reset):
 		m.elapsed = 0
+		m.recordedElapsed = 0
 		m.duration = m.currentTask.Duration
-		return m.updateProgressBar()
+		if m.activeTask != nil {
+			delete(m.taskTimers, m.activeTask.ID)
+		} else {
+			delete(m.taskTimers, 0)
+		}
+		m.timer = timer.New(m.duration)
+		cmds := []tea.Cmd{m.updateProgressBar()}
+		if m.sessionState == Running {
+			cmds = append(cmds, m.timer.Start())
+		}
+		return tea.Batch(cmds...)
 
 	case key.Matches(msg, keyMap.Skip):
 		m.recordSession()
@@ -130,29 +142,21 @@ func (m *Model) handleWindowResize(msg tea.WindowSizeMsg) tea.Cmd {
 }
 
 func (m *Model) handleTimerTick(msg timer.TickMsg) tea.Cmd {
-	if m.sessionState == Paused {
+	if m.sessionState != Running {
 		return nil
 	}
 
-	var cmds []tea.Cmd
 	var cmd tea.Cmd
-
 	m.timer, cmd = m.timer.Update(msg)
-	cmds = append(cmds, cmd)
-
 	if cmd == nil {
-		// msg rejected, ignore
-		// i.e. old timer tick
-		log.Println("tick rejected, ignoring")
+		// msg rejected, ignore (e.g. old tick from replaced timer ID)
 		return nil
 	}
 
 	m.elapsed += m.timer.Interval
 
 	percent := m.getPercent()
-	cmds = append(cmds, m.progressBar.SetPercent(percent))
-
-	return tea.Batch(cmds...)
+	return tea.Batch(cmd, m.progressBar.SetPercent(percent))
 }
 
 func (m *Model) handleConfirmTick() tea.Cmd {
@@ -206,6 +210,11 @@ func (m *Model) handleCompletion() tea.Cmd {
 	log.Println("timer completed")
 
 	m.recordSession()
+	if m.activeTask != nil {
+		delete(m.taskTimers, m.activeTask.ID)
+	} else {
+		delete(m.taskTimers, 0)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), actions.CommandTimeout)
 	m.commandsCancel = cancel
@@ -292,6 +301,7 @@ func (m *Model) startSession(taskType config.TaskType, task config.Task, isShort
 	m.currentTask = task
 
 	m.elapsed = 0
+	m.recordedElapsed = 0
 	m.duration = m.currentTask.Duration
 	m.timer = timer.New(m.currentTask.Duration)
 
@@ -304,24 +314,28 @@ func (m *Model) startSession(taskType config.TaskType, task config.Task, isShort
 
 // records the current session into the session summary
 func (m *Model) recordSession() {
+	delta := m.elapsed - m.recordedElapsed
 	// ignore very short or zero duration sessions
-	if m.elapsed < time.Second {
+	if delta < time.Second {
 		return
 	}
 
 	// short sessions extend the current session without incrementing the count
 	if m.isShortSession {
-		m.sessionSummary.AddDuration(m.currentTaskType, m.elapsed)
+		m.sessionSummary.AddDuration(m.currentTaskType, delta)
 		if m.currentTaskType == config.WorkTask && m.activeTask != nil {
-			m.sessionSummary.AddTaskDuration(m.elapsed)
+			m.sessionSummary.AddTaskDuration(delta)
 		}
+		m.recordedElapsed = m.elapsed
 		return
 	}
 
-	m.sessionSummary.AddSession(m.currentTaskType, m.elapsed)
+	m.sessionSummary.AddSession(m.currentTaskType, delta)
 	if m.currentTaskType == config.WorkTask && m.activeTask != nil {
-		m.sessionSummary.AddTaskSession(m.activeTask.ID, m.activeTask.Title, m.elapsed)
+		m.sessionSummary.AddTaskSession(m.activeTask.ID, m.activeTask.Title, delta)
 	}
+
+	m.recordedElapsed = m.elapsed
 
 	// return if no database is configured
 	if m.repo == nil {
@@ -335,7 +349,7 @@ func (m *Model) recordSession() {
 
 	if err := m.repo.CreateSession(
 		time.Now(),
-		m.elapsed,
+		delta,
 		db.GetSessionType(m.currentTaskType),
 		taskID,
 	); err != nil {
@@ -344,7 +358,7 @@ func (m *Model) recordSession() {
 
 	if m.currentTaskType == config.WorkTask && m.activeTask != nil {
 		m.activeTask.TotalPomodoros++
-		m.activeTask.TotalDuration += m.elapsed
+		m.activeTask.TotalDuration += delta
 	}
 }
 
@@ -398,4 +412,85 @@ func (m *Model) Quit() tea.Cmd {
 
 	m.sessionState = Quitting
 	return tea.Quit
+}
+
+func (m *Model) switchTask(newTask *db.Task) tea.Cmd {
+	var oldID int
+	if m.activeTask != nil {
+		oldID = m.activeTask.ID
+	}
+	var newID int
+	if newTask != nil {
+		newID = newTask.ID
+	}
+
+	// If it's the exact same task, do nothing to the timer
+	if m.activeTask != nil && newTask != nil && oldID == newID {
+		return nil
+	}
+	if m.activeTask == nil && newTask == nil {
+		return nil
+	}
+
+	// If in Break session, just bind the task for the upcoming work session
+	if m.currentTaskType == config.BreakTask {
+		m.activeTask = newTask
+		if newTask != nil {
+			m.sessionSummary.SetFocusedTask(newTask.ID, newTask.Title)
+		}
+		return nil
+	}
+
+	// 1. Record any unrecorded elapsed time for the previous task/session
+	m.recordSession()
+
+	// 2. Save timer state for the old task if it has remaining time
+	if m.elapsed < m.duration {
+		m.taskTimers[oldID] = &TaskTimerState{
+			Elapsed:         m.elapsed,
+			Duration:        m.duration,
+			RecordedElapsed: m.recordedElapsed,
+		}
+	} else {
+		delete(m.taskTimers, oldID)
+	}
+
+	// 3. Switch active task
+	m.activeTask = newTask
+	if newTask != nil {
+		m.sessionSummary.SetFocusedTask(newTask.ID, newTask.Title)
+	}
+
+	// 4. Restore or initialize timer for the new task
+	if saved, exists := m.taskTimers[newID]; exists && saved.Elapsed < saved.Duration {
+		m.elapsed = saved.Elapsed
+		m.duration = saved.Duration
+		m.recordedElapsed = saved.RecordedElapsed
+	} else {
+		m.elapsed = 0
+		m.recordedElapsed = 0
+		m.duration = m.currentTask.Duration
+	}
+
+	timeLeft := m.duration - m.elapsed
+	if timeLeft <= 0 {
+		timeLeft = m.currentTask.Duration
+		m.elapsed = 0
+		m.recordedElapsed = 0
+		m.duration = m.currentTask.Duration
+	}
+
+	// 5. Create fresh timer with new unique ID (invalidates any stale tick messages)
+	m.timer = timer.New(timeLeft)
+
+	var cmds []tea.Cmd
+	cmds = append(cmds, m.progressBar.SetPercent(m.getPercent()))
+
+	// Resume timer if it was running before opening the picker
+	if m.prevState == Running || m.sessionState == Running {
+		m.sessionState = Running
+		cmds = append(cmds, m.timer.Start())
+	}
+
+	return tea.Batch(cmds...)
 }

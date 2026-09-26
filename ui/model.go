@@ -30,9 +30,11 @@ type Model struct {
 	form          taskform.Model
 
 	// timer
-	timer    timer.Model
-	duration time.Duration
-	elapsed  time.Duration
+	timer           timer.Model
+	duration        time.Duration
+	elapsed         time.Duration
+	recordedElapsed time.Duration
+	taskTimers      map[int]*TaskTimerState
 
 	// state
 	width, height    int // window dimensions
@@ -62,6 +64,11 @@ type Model struct {
 
 func NewModel(taskType config.TaskType, cfg config.Config) Model {
 	task := taskType.GetTask()
+	if taskType == config.WorkTask && cfg.Work.Duration > 0 {
+		task = &cfg.Work
+	} else if taskType == config.BreakTask && cfg.Break.Duration > 0 {
+		task = &cfg.Break
+	}
 
 	var timerFont ascii.Font
 	timerStyle := lipgloss.NewStyle()
@@ -107,9 +114,16 @@ func NewModel(taskType config.TaskType, cfg config.Config) Model {
 		timerFont:       timerFont,
 		asciiTimerStyle: timerStyle,
 
-		repo:     repo,
-		taskRepo: taskRepo,
+		repo:       repo,
+		taskRepo:   taskRepo,
+		taskTimers: make(map[int]*TaskTimerState),
 	}
+}
+
+type TaskTimerState struct {
+	Elapsed         time.Duration
+	Duration        time.Duration
+	RecordedElapsed time.Duration
 }
 
 type SessionState byte
