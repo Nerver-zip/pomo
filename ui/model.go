@@ -12,10 +12,13 @@ import (
 	"github.com/Nerver-zip/pomo-tasker/ui/colors"
 	"github.com/Nerver-zip/pomo-tasker/ui/confirm"
 	"github.com/Nerver-zip/pomo-tasker/ui/summary"
+	"github.com/Nerver-zip/pomo-tasker/ui/taskform"
+	"github.com/Nerver-zip/pomo-tasker/ui/taskpicker"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/timer"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/jmoiron/sqlx"
 )
 
 type Model struct {
@@ -23,6 +26,8 @@ type Model struct {
 	progressBar   progress.Model
 	confirmDialog confirm.Model
 	help          help.Model
+	picker        taskpicker.Model
+	form          taskform.Model
 
 	// timer
 	timer    timer.Model
@@ -33,6 +38,7 @@ type Model struct {
 	width, height    int // window dimensions
 	onSessionEnd     string
 	sessionState     SessionState
+	prevState        SessionState
 	confirmStartTime time.Time
 	currentTaskType  config.TaskType
 	currentTask      config.Task
@@ -48,8 +54,10 @@ type Model struct {
 	timerFont       ascii.Font
 	asciiTimerStyle lipgloss.Style
 
-	// databse
-	repo *db.SessionRepo
+	// database & persistent task
+	repo       *db.SessionRepo
+	taskRepo   *db.TaskRepo
+	activeTask *db.Task
 }
 
 func NewModel(taskType config.TaskType, cfg config.Config) Model {
@@ -69,16 +77,14 @@ func NewModel(taskType config.TaskType, cfg config.Config) Model {
 
 	database, err := db.Connect()
 	var repo *db.SessionRepo
+	var taskRepo *db.TaskRepo
 
 	if err != nil {
-		// gracefully handle database connection failure
-		// fallback to in-memory summary only (nil repo)
 		log.Printf("failed to initialize database: %v", err)
-
-		// mark database as unavailable in the session summary
 		sessionSummary.SetDatabaseUnavailable()
 	} else {
 		repo = db.NewSessionRepo(database)
+		taskRepo = db.NewTaskRepo(database)
 	}
 
 	return Model{
@@ -101,7 +107,8 @@ func NewModel(taskType config.TaskType, cfg config.Config) Model {
 		timerFont:       timerFont,
 		asciiTimerStyle: timerStyle,
 
-		repo: repo,
+		repo:     repo,
+		taskRepo: taskRepo,
 	}
 }
 
@@ -112,9 +119,32 @@ const (
 	Paused
 	ShowingConfirm
 	WaitingForCommands // waiting for post commands before quitting
+	ShowingTaskPicker
+	ShowingTaskForm
 	Quitting
 )
 
 func (m Model) GetSessionSummary() summary.SessionSummary {
 	return m.sessionSummary
+}
+
+func (m *Model) SetInitialTask(task *db.Task) {
+	m.activeTask = task
+}
+
+func (m Model) ActiveTask() *db.Task {
+	return m.activeTask
+}
+
+func (m Model) State() SessionState {
+	return m.sessionState
+}
+
+func NewModelWithDB(taskType config.TaskType, cfg config.Config, database *sqlx.DB) Model {
+	m := NewModel(taskType, cfg)
+	if database != nil {
+		m.repo = db.NewSessionRepo(database)
+		m.taskRepo = db.NewTaskRepo(database)
+	}
+	return m
 }

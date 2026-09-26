@@ -10,6 +10,7 @@ import (
 	"github.com/Nerver-zip/pomo-tasker/config"
 	"github.com/Nerver-zip/pomo-tasker/db"
 	"github.com/Nerver-zip/pomo-tasker/ui/confirm"
+	"github.com/Nerver-zip/pomo-tasker/ui/taskpicker"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/timer"
@@ -22,6 +23,14 @@ type (
 )
 
 func (m *Model) handleKeys(msg tea.KeyMsg) tea.Cmd {
+	if m.sessionState == ShowingTaskPicker {
+		return m.picker.HandleKeys(msg)
+	}
+
+	if m.sessionState == ShowingTaskForm {
+		return m.form.HandleKeys(msg)
+	}
+
 	if m.sessionState == ShowingConfirm {
 		return m.confirmDialog.HandleKeys(msg)
 	}
@@ -37,6 +46,29 @@ func (m *Model) handleKeys(msg tea.KeyMsg) tea.Cmd {
 	}
 
 	switch {
+	case key.Matches(msg, keyMap.Task):
+		if m.taskRepo != nil {
+			tasks, err := m.taskRepo.ListPending()
+			if err == nil {
+				activeID := 0
+				if m.activeTask != nil {
+					activeID = m.activeTask.ID
+				}
+				m.picker = taskpicker.New(tasks, activeID)
+				m.picker.HandleWindowResize(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+				m.prevState = m.sessionState
+				m.sessionState = ShowingTaskPicker
+			}
+		}
+		return nil
+
+	case key.Matches(msg, keyMap.Complete):
+		if m.activeTask != nil && m.taskRepo != nil {
+			_ = m.taskRepo.Complete(m.activeTask.ID)
+			m.activeTask = nil
+		}
+		return nil
+
 	case key.Matches(msg, keyMap.Increase):
 		m.duration += time.Minute
 		return m.updateProgressBar()
@@ -87,6 +119,8 @@ func (m *Model) handleConfirmChoice(msg confirm.ChoiceMsg) tea.Cmd {
 
 func (m *Model) handleWindowResize(msg tea.WindowSizeMsg) tea.Cmd {
 	m.confirmDialog.HandleWindowResize(msg) // always update it
+	m.picker.HandleWindowResize(msg)
+	m.form.HandleWindowResize(msg)
 
 	m.width = msg.Width
 	m.height = msg.Height
@@ -288,13 +322,23 @@ func (m *Model) recordSession() {
 		return
 	}
 
+	var taskID *int
+	if m.currentTaskType == config.WorkTask && m.activeTask != nil {
+		taskID = &m.activeTask.ID
+	}
+
 	if err := m.repo.CreateSession(
 		time.Now(),
 		m.elapsed,
 		db.GetSessionType(m.currentTaskType),
-		nil,
+		taskID,
 	); err != nil {
 		log.Printf("failed to record session: %v", err)
+	}
+
+	if m.currentTaskType == config.WorkTask && m.activeTask != nil {
+		m.activeTask.TotalPomodoros++
+		m.activeTask.TotalDuration += m.elapsed
 	}
 }
 

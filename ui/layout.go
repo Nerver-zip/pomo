@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Nerver-zip/pomo-tasker/config"
 	"github.com/Nerver-zip/pomo-tasker/ui/ascii"
 	"github.com/Nerver-zip/pomo-tasker/ui/colors"
 	"github.com/charmbracelet/lipgloss"
@@ -33,13 +34,28 @@ func (m *Model) buildConfirmDialogView() string {
 func (m *Model) buildMainContent() string {
 	timeLeft := m.buildTimeLeft()
 
-	if m.useTimerArt {
-		return timeLeft + "\n\n" + m.currentTask.Title
+	title := m.currentTask.Title
+	if m.activeTask != nil && m.currentTaskType == config.WorkTask {
+		title = fmt.Sprintf("#%d · %s", m.activeTask.ID, m.activeTask.Title)
 	}
 
-	content := m.currentTask.Title
-	if !m.timer.Timedout() {
-		content += separator + timeLeft
+	var content string
+	if m.useTimerArt {
+		content = timeLeft + "\n\n" + title
+	} else {
+		content = title
+		if !m.timer.Timedout() {
+			content += separator + timeLeft
+		}
+	}
+
+	if m.activeTask != nil && m.currentTaskType == config.WorkTask && m.activeTask.Description != "" && m.width >= 60 {
+		desc := m.activeTask.Description
+		maxDescLen := m.width - 10
+		if len(desc) > maxDescLen && maxDescLen > 3 {
+			desc = desc[:maxDescLen-3] + "..."
+		}
+		content += "\n" + lipgloss.NewStyle().Faint(true).Render(desc)
 	}
 
 	return content
@@ -54,6 +70,10 @@ func (m *Model) buildStatusIndicators() string {
 
 	if m.longBreak.Enabled {
 		indicators += fmt.Sprintf(" · %d/%d", m.cyclePosition, m.longBreak.After)
+	}
+
+	if m.activeTask != nil {
+		indicators += fmt.Sprintf(" · task: %d 🍅", m.activeTask.TotalPomodoros)
 	}
 
 	if m.sessionState == Paused {

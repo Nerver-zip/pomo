@@ -3,6 +3,8 @@ package ui
 
 import (
 	"github.com/Nerver-zip/pomo-tasker/ui/confirm"
+	"github.com/Nerver-zip/pomo-tasker/ui/taskform"
+	"github.com/Nerver-zip/pomo-tasker/ui/taskpicker"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
@@ -39,6 +41,65 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case commandsDoneMsg:
 		return m, m.handleCommandsDone()
 
+	case taskpicker.TaskSelectedMsg:
+		m.activeTask = &msg.Task
+		m.sessionState = m.prevState
+		return m, nil
+
+	case taskpicker.OpenNewTaskFormMsg:
+		m.form = taskform.NewForCreate()
+		m.form.HandleWindowResize(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+		m.sessionState = ShowingTaskForm
+		return m, nil
+
+	case taskpicker.OpenEditTaskFormMsg:
+		m.form = taskform.NewForEdit(msg.Task)
+		m.form.HandleWindowResize(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+		m.sessionState = ShowingTaskForm
+		return m, nil
+
+	case taskpicker.TaskCompletedMsg:
+		if m.taskRepo != nil {
+			_ = m.taskRepo.Complete(msg.Task.ID)
+			if m.activeTask != nil && m.activeTask.ID == msg.Task.ID {
+				m.activeTask = nil
+			}
+			tasks, _ := m.taskRepo.ListPending()
+			m.picker.SetTasks(tasks)
+		}
+		return m, nil
+
+	case taskpicker.ClosePickerMsg:
+		m.sessionState = m.prevState
+		return m, nil
+
+	case taskform.TaskFormSubmitMsg:
+		if m.taskRepo != nil {
+			if msg.IsEdit {
+				_ = m.taskRepo.Update(msg.TaskID, msg.Title, msg.Description)
+				if m.activeTask != nil && m.activeTask.ID == msg.TaskID {
+					m.activeTask.Title = msg.Title
+					m.activeTask.Description = msg.Description
+				}
+				tasks, _ := m.taskRepo.ListPending()
+				m.picker.SetTasks(tasks)
+				m.sessionState = ShowingTaskPicker
+			} else {
+				task, err := m.taskRepo.Create(msg.Title, msg.Description)
+				if err == nil {
+					m.activeTask = task
+				}
+				m.sessionState = m.prevState
+			}
+		} else {
+			m.sessionState = m.prevState
+		}
+		return m, nil
+
+	case taskform.CloseFormMsg:
+		m.sessionState = ShowingTaskPicker
+		return m, nil
+
 	default:
 		return m, nil
 	}
@@ -56,6 +117,16 @@ func (m Model) View() string {
 	// show confirmation dialog
 	if m.sessionState == ShowingConfirm {
 		return m.buildConfirmDialogView()
+	}
+
+	// show task picker overlay
+	if m.sessionState == ShowingTaskPicker {
+		return m.picker.View()
+	}
+
+	// show task form overlay
+	if m.sessionState == ShowingTaskForm {
+		return m.form.View()
 	}
 
 	content := m.buildMainContent()

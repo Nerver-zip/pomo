@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Nerver-zip/pomo-tasker/config"
+	"github.com/Nerver-zip/pomo-tasker/db"
 	"github.com/Nerver-zip/pomo-tasker/ui"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -26,6 +27,21 @@ func runTask(taskType config.TaskType, cmd *cobra.Command) {
 	log.Printf("starting %v session: %v", taskType.GetTask().Title, taskType.GetTask().Duration)
 
 	m := ui.NewModel(taskType, config.C)
+	if cmd.Flags().Lookup("task") != nil {
+		if taskID, err := cmd.Flags().GetInt("task"); err == nil && taskID > 0 {
+			database, err := db.Connect()
+			if err != nil {
+				die(fmt.Errorf("failed to connect to database: %w", err))
+			}
+			taskRepo := db.NewTaskRepo(database)
+			t, err := taskRepo.GetByID(taskID)
+			if err != nil {
+				die(fmt.Errorf("task #%d not found: %w", taskID, err))
+			}
+			m.SetInitialTask(t)
+		}
+	}
+
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	finalModel, err := p.Run()

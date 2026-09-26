@@ -9,6 +9,8 @@ type KeyMap struct {
 	Reset    key.Binding
 	Pause    key.Binding
 	Skip     key.Binding
+	Task     key.Binding
+	Complete key.Binding
 	Quit     key.Binding
 }
 
@@ -18,12 +20,17 @@ func (k KeyMap) ShortHelp() []key.Binding {
 		k.Pause,
 		k.Reset,
 		k.Skip,
+		k.Task,
+		k.Complete,
 		k.Quit,
 	}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{}
+	return [][]key.Binding{
+		{k.Increase, k.Pause, k.Reset, k.Skip},
+		{k.Task, k.Complete, k.Quit},
+	}
 }
 
 var keyMap = KeyMap{
@@ -42,6 +49,14 @@ var keyMap = KeyMap{
 	Skip: key.NewBinding(
 		key.WithKeys("s"),
 		key.WithHelp("s", "skip"),
+	),
+	Task: key.NewBinding(
+		key.WithKeys("t"),
+		key.WithHelp("t", "task"),
+	),
+	Complete: key.NewBinding(
+		key.WithKeys("c"),
+		key.WithHelp("c", "done"),
 	),
 	Quit: key.NewBinding(
 		key.WithKeys("ctrl+c", "q"),
