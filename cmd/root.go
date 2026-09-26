@@ -40,6 +40,17 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
+func ExecuteWithArgs(args []string, out io.Writer) error {
+	rootCmd.SetOut(out)
+	rootCmd.SetErr(out)
+	rootCmd.SetArgs(args)
+	return rootCmd.Execute()
+}
+
+func RootCommand() *cobra.Command {
+	return rootCmd
+}
+
 func init() {
 	rootCmd.Flags().StringP(
 		"title",

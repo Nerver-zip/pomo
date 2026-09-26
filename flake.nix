@@ -1,5 +1,5 @@
 {
-  description = "A simple Pomodoro timer TUI application written in Go.";
+  description = "A timer-first Pomodoro timer TUI with persistent task context written in Go.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -28,12 +28,12 @@
         { pkgs }:
         {
           default = pkgs.buildGoModule {
-            pname = "pomo";
+            pname = "pomo-tasker";
             version = "1.2.1";
 
             src = ./.;
 
-            vendorHash = "sha256-kbTYq4Xc86bcmNMhInq1rwYTbGRmu2TEXT2e7bqT5YY=";
+            vendorHash = null;
 
             ldflags = [
               "-s"
@@ -41,11 +41,11 @@
             ];
 
             meta = with pkgs.lib; {
-              description = "Customizable TUI Pomodoro timer with ASCII art, progress bar, desktop notifications, and productivity statistics";
-              homepage = "https://github.com/Bahaaio/pomo";
+              description = "Timer-first Pomodoro TUI with persistent task context, progress bar, desktop notifications, and focus statistics";
+              homepage = "https://github.com/Nerver-zip/pomo-tasker";
               license = licenses.mit;
               platforms = platforms.linux ++ platforms.darwin;
-              mainProgram = "pomo";
+              mainProgram = "pomo-tasker";
             };
           };
         }

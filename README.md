@@ -1,260 +1,189 @@
-# pomo — Terminal Pomodoro Timer
+# pomo-tasker — Timer-First Pomodoro TUI with Persistent Task Context
 
-![Demo](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/pomo.gif)
+[![Latest Release](https://img.shields.io/github/release/Nerver-zip/pomo-tasker.svg)](https://github.com/Nerver-zip/pomo-tasker/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![Latest Release](https://img.shields.io/github/release/Bahaaio/pomo.svg)](https://github.com/Bahaaio/pomo/releases/latest)
-![Build Status](https://github.com/Bahaaio/pomo/actions/workflows/build.yml/badge.svg)
+**pomo-tasker** is a timer-first Pomodoro timer TUI application written in Go with [Bubble Tea](https://github.com/charmbracelet/bubbletea), evolved from [Bahaaio/pomo](https://github.com/Bahaaio/pomo).
 
-A simple, customizable Pomodoro timer for your terminal, built with [Bubble Tea](https://github.com/charmbracelet/bubbletea).
+It introduces a lightweight, frictionless layer of **persistent tasks linked to Pomodoro sessions** while keeping the large, central timer as the undisputed hero of the interface.
 
-## Features
+---
 
-- 🍅 Work and break timer sessions
-- 🔄 Pomodoro cycles with long break
-- 🔗 Task chaining with user confirmation prompts
-- 📊 Real-time progress bar visualization
-- ⌨️ Keyboard shortcuts to adjust time mid-session
-- ⏸️ Pause and resume sessions
-- ⏭️ Skip to next session
-- 🔔 Cross-platform desktop notifications
-- 🎨 Clean, minimal terminal UI with ASCII art timer fonts
-- 🛠️ Custom commands when timers complete
+## 🧭 Philosophy: Timer-First, Context-Driven
 
-### Statistics
+> *A Pomodoro is focus spent on a concrete task, rather than just an abstract interval.*
 
-Track your productivity with `pomo stats`:
+1. **Zero Friction for Untracked Sessions:** Running `pomo` or `pomo 30m` starts an untracked session immediately. You are never forced to create a task or interrupted by startup modals.
+2. **Anti-Scope Creep:** Tasks are lean (`id`, `title`, `description`, `status`, `created_at`, `completed_at`). No Kanban boards, no calendars, no subtask trees, and no bloated dashboards.
+3. **Flow State Across Breaks:** Work sessions link to your active task. Breaks are cognitive rest (`task_id = NULL`). When a break concludes, the active task remains selected for your next work sprint.
 
-- **Duration ratio** — total work vs break time
-- **Weekly bar chart** — daily work hours for the past 7 days
-- **4-month heatmap** — GitHub-style activity visualization
+---
 
-> Heatmap icons require a [Nerd Font](https://www.nerdfonts.com/)
+## ✨ Features
 
-![Stats](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/stats.png)
+- 🍅 **Hero Timer:** Large ASCII art timer or minimal clean layout.
+- 📋 **Persistent Tasks:** Link focus sessions to concrete tasks in SQLite (`WAL` mode).
+- 🔄 **Session Chaining & Flow Retention:** Active task binding sticks across break intervals.
+- ⚡ **In-TUI Task Management:** Press `t` to pick or create tasks without leaving the timer.
+- ⌨️ **Quick Complete:** Press `c` mid-session to mark the active task completed.
+- 🔔 **Desktop Notifications:** Cross-platform notifications when sessions finish.
+- 📊 **Exit Summary:** Formatted end-of-session report displaying time spent on your active task.
+- 📈 **Productivity Analytics:** Visual dashboard with heatmaps, streaks, and per-task focus stats.
+- 📁 **Full XDG Compliance:** Transparent data migration from legacy `pomo` databases.
 
-### Desktop Notifications
+---
 
-pomo sends native desktop notifications when sessions complete
+## 🚀 Quick Start
 
-<details>
-<summary>🔔 View notification examples</summary>
-
-**Linux (GNOME)**
-
-![Linux Notification](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/notification_linux.png)
-
-**Windows**
-
-![Windows Notification](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/notification_windows.jpg)
-
-_Note: Actual notification appearance varies by operating system and desktop environment_
-
-</details>
-
-## Timer Fonts
-
-<!-- prettier-ignore -->
-|              **mono12**              |                  **rebel**                   |
-| :----------------------------------: | :------------------------------------------: |
-| ![mono12](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/mono12.png) |      ![rebel](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/rebel.png)      |
-|               **ansi**               |                **ansiShadow**                |
-|   ![ansi](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/ansi.png)   | ![ansiShadow](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/ansiShadow.png) |
-
-## Usage
-
-Work sessions:
+### 1. Untracked Sessions (Classic Pomo)
 
 ```bash
-pomo                    # work session
-pomo 30m                # 30m work session
+pomo                    # Start default work session (e.g. 25m)
+pomo 30m                # Start 30-minute work session
 pomo 45m 15m            # 45m work with 15m break
-pomo -t "write report"  # work session with custom title (or --title)
+pomo break              # Start 5-minute break
+pomo break 10m          # Start 10-minute break
 ```
 
-Break sessions:
+### 2. Focus on a Persistent Task
 
 ```bash
-pomo break              # break session
-pomo break 10m          # 10m break session
+# Attach task by ID at launch
+pomo -T 1
+pomo --task 1 30m
+
+# Or use the task start shortcut
+pomo task start 1
 ```
 
-View statistics:
+---
+
+## 📋 Task Management CLI
+
+`pomo-tasker` includes a dedicated `task` subcommand suite:
 
 ```bash
-pomo stats              # View your productivity stats
+# Add a new task
+pomo task add "Refactor parser" -d "Implement AST visitor pattern"
+
+# List pending tasks
+pomo task list
+
+# List completed tasks
+pomo task list --done
+
+# List all tasks
+pomo task list --all
+
+# Edit an existing task
+pomo task edit 1 -t "Refactor parser & lexer" -d "Updated notes"
+
+# Mark task as completed
+pomo task done 1
+
+# Reopen a completed task
+pomo task reopen 1
+
+# Delete a task
+pomo task delete 1
+
+# View focus metrics for a specific task
+pomo task stats 1
+# or via stats command:
+pomo stats -T 1
 ```
 
-## Installation
+---
 
-### Homebrew (macOS)
+## ⌨️ Keyboard Controls
+
+### In-Timer Controls
+
+| Key | Action |
+| --- | --- |
+| `Space` | Pause / Resume timer |
+| `↑` / `k` / `+` | Increase time by 1 minute |
+| `←` / `h` | Reset to initial duration |
+| `s` | Skip to next session |
+| `t` | **Open Task Picker overlay** |
+| `c` | **Mark active task completed** |
+| `q` / `Ctrl+C` | Quit session and display summary |
+
+### Task Picker Overlay (`t`)
+
+| Key | Action |
+| --- | --- |
+| `↑` / `↓` / `k` / `j` | Navigate tasks |
+| `Enter` | Select task and bind to timer |
+| `n` | Create a new task (opens modal form) |
+| `e` | Edit selected task |
+| `c` | Mark selected task completed |
+| `Esc` / `q` | Close picker without changing task |
+
+---
+
+## 📊 Session Exit Summary
+
+When quitting or completing sessions, `pomo-tasker` prints an informative summary:
+
+```text
+Session Summary:
+ Focused Task: #1 Refactor parser (2 sessions · 50m0s)
+ Work : 50m0s (2 sessions)
+ Break: 5m0s (1 session)
+ Total: 55m0s
+
+ [███████████████████████████░░░] 91% work
+```
+
+---
+
+## 🛠️ Configuration & Database
+
+### Configuration File
+
+`pomo-tasker` looks for its configuration file in:
+1. `./pomo.yaml` (Current directory)
+2. `$XDG_CONFIG_HOME/pomo-tasker/pomo.yaml` (or `~/.config/pomo-tasker/pomo.yaml`)
+3. Legacy fallback: `~/.config/pomo/pomo.yaml`
+
+See [pomo.yaml](pomo.yaml) for available options (ASCII art fonts, notifications, hooks).
+
+### Database & Migrations
+
+The SQLite database is stored at:
+- `$XDG_STATE_HOME/pomo-tasker/pomo-tasker.db` (or `~/.local/state/pomo-tasker/pomo-tasker.db`)
+
+**Seamless Upgrade:** If you have an existing database from `pomo` at `~/.local/state/pomo/pomo.db`, `pomo-tasker` automatically copies it on first launch and applies sequential schema migrations without touching or colliding with upstream data.
+
+---
+
+## 📦 Installation
+
+### From Source
 
 ```bash
-brew install --cask bahaaio/pomo/pomo
+git clone https://github.com/Nerver-zip/pomo-tasker
+cd pomo-tasker
+go build -o pomo-tasker .
 ```
 
-### Winget (Windows)
-
-```powershell
-winget install Bahaaio.pomo
-```
-
-### Go
+### Go Install
 
 ```bash
-go install github.com/Bahaaio/pomo@latest
+go install github.com/Nerver-zip/pomo-tasker@latest
 ```
 
-### Pre-built Binaries
-
-Download pre-built binaries from the [releases page](https://github.com/Bahaaio/pomo/releases/latest).
-
-### Nix
-
-<details>
-<summary>❄️ Nix flake installation</summary>
-
-**Option 1: Add to flake inputs and system packages**
-
-In your `flake.nix`:
-
-```nix
-pomo = {
-  url = "github:Bahaaio/pomo";
-  inputs.nixpkgs.follows = "nixpkgs";
-};
-```
-
-Then add to your system packages:
-
-```nix
-environment.systemPackages = with pkgs; [
-  inputs.pomo.packages.${pkgs.stdenv.hostPlatform.system}.default
-];
-```
-
-**Option 2: Run directly**
+### Nix Flake
 
 ```bash
-nix run github:Bahaaio/pomo
+nix run github:Nerver-zip/pomo-tasker
 ```
 
-</details>
+---
 
-### Build from Source
+## 📄 License & Attribution
 
-```bash
-git clone https://github.com/Bahaaio/pomo
-cd pomo
-go build .
-```
+`pomo-tasker` is licensed under the [MIT License](LICENSE).
 
-## Configuration
-
-<details>
-<summary>📁 Config file search order</summary>
-
-pomo looks for its config file in the following order:
-
-1. **Current directory**: `pomo.yaml` (highest priority)
-2. **System config directory**:
-   - **Linux**/**macOS**: `~/.config/pomo/pomo.yaml`
-   - **Windows**: `%APPDATA%\pomo\pomo.yaml`
-3. **Built-in defaults** if no config file is found
-
-</details>
-
-Example `pomo.yaml`:
-
-```yaml
-# action to take after session completion
-# options: "ask" | "start" | "quit"
-onSessionEnd: "ask"
-
-asciiArt:
-  # use ASCII art for timer display
-  enabled: true
-
-  # available fonts: "mono12" | "rebel" | "ansi" | "ansiShadow"
-  # default: mono12
-  font: ansiShadow
-
-  # color of the ASCII art timer
-  # hex color or "none"
-  color: "#5A56E0"
-
-work:
-  duration: 25m
-  title: work session
-
-  # cross-platform notifications
-  notification:
-    enabled: true
-    urgent: true # persistent notification with alert sound (platform-dependent)
-    title: work finished 🎉
-    message: time to take a break
-    icon: ~/my/icon.png
-
-break:
-  duration: 5m
-
-  # will run after the session ends
-  then:
-    - [spd-say, "Back to work!"]
-
-longBreak:
-  # enable long break after a certain number of work sessions
-  enabled: true
-
-  # number of work sessions before long break
-  after: 4
-
-  # long break duration
-  duration: 15m
-```
-
-Check out [pomo.yaml](pomo.yaml) for a full example with all options.
-
-### Sound Notifications
-
-You can play sounds when sessions complete by running commands in the `then` section.
-
-```yaml
-work:
-  then:
-    - [paplay, ~/sounds/work-done.mp3] # Linux
-    # - [afplay, ~/sounds/work-done.mp3] # macOS
-    # - [powershell, start, work-done.mp3] # Windows
-```
-
-> Commands run with a 5 second timeout and are automatically cancelled when starting the next session.
-
-### Key Bindings
-
-#### Timer Controls
-
-| Key            | Action                    |
-| -------------- | ------------------------- |
-| `↑` / `k`      | Increase time by 1 minute |
-| `Space`        | Pause/Resume timer        |
-| `←` / `h`      | Reset to initial duration |
-| `s`            | Skip to next session      |
-| `q` / `Ctrl+C` | Quit                      |
-
-> Skip button skips directly to the next session, bypassing any prompts
-
-#### Confirmation Dialog
-
-| Key            | Action                          |
-| -------------- | ------------------------------- |
-| `y`            | Confirm (Yes)                   |
-| `n`            | Cancel (No)                     |
-| `s`            | Start short session (2 minutes) |
-| `Tab`          | Toggle selection                |
-| `Enter`        | Submit choice                   |
-| `q` / `Ctrl+C` | Quit                            |
-
-> Short sessions extend the current session by 2 minutes, useful when you need a bit more time
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is a fork and evolution of [Bahaaio/pomo](https://github.com/Bahaaio/pomo), originally created by Bahaa Mohamed. We are deeply grateful for their elegant TUI foundation.

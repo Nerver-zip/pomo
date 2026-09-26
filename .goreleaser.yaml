@@ -1,6 +1,6 @@
 version: 2
 
-project_name: pomo
+project_name: pomo-tasker
 
 before:
   hooks:
@@ -9,7 +9,9 @@ before:
     - go test ./...
 
 builds:
-  - env:
+  - id: pomo-tasker
+    binary: pomo-tasker
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -63,42 +65,25 @@ archives:
       - pomo.yaml
 
 homebrew_casks:
-  - name: pomo
+  - name: pomo-tasker
     repository:
-      owner: Bahaaio
-      name: homebrew-pomo
-    homepage: https://github.com/Bahaaio/pomo
-    description: A simple Pomodoro timer TUI application written in Go.
+      owner: Nerver-zip
+      name: homebrew-pomo-tasker
+    homepage: https://github.com/Nerver-zip/pomo-tasker
+    description: A timer-first Pomodoro TUI with persistent task context.
     license: MIT
 
     hooks:
       post:
         install: |
           if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/pomo"]
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/pomo-tasker"]
           end
 
-winget:
-  - name: pomo
-    publisher: Bahaaio
-    homepage: https://github.com/Bahaaio
-    short_description: A simple Pomodoro timer TUI application written in Go.
-    license: MIT
-    repository:
-      owner: Bahaaio
-      name: winget-pkgs
-      branch: "pomo-{{.Version}}"
-      pull_request:
-        enabled: true
-        base:
-          owner: microsoft
-          name: winget-pkgs
-          branch: master
-
 nfpms:
-  - maintainer: Bahaa Mohamed <bahaa-dev@proton.me>
-    description: A simple Pomodoro timer TUI application written in Go.
-    homepage: https://github.com/Bahaaio/pomo
+  - maintainer: Nerver-zip
+    description: A timer-first Pomodoro TUI with persistent task context.
+    homepage: https://github.com/Nerver-zip/pomo-tasker
     license: MIT
     formats:
       - deb
@@ -106,15 +91,15 @@ nfpms:
 
 release:
   github:
-    owner: Bahaaio
-    name: pomo
+    owner: Nerver-zip
+    name: pomo-tasker
   name_template: "v{{.Version}}"
   footer: |
     ## Install
 
     ### Go
     ```bash
-    go install github.com/Bahaaio/pomo@latest
+    go install github.com/Nerver-zip/pomo-tasker@latest
     ```
 
     ### Download Binary
