@@ -2,7 +2,7 @@
 package ui
 
 import (
-	"github.com/Bahaaio/pomo/ui/confirm"
+	"github.com/Nerver-zip/pomo-tasker/ui/confirm"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"

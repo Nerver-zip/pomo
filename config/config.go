@@ -13,13 +13,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Bahaaio/pomo/ui/ascii"
-	"github.com/Bahaaio/pomo/ui/colors"
+	"github.com/Nerver-zip/pomo-tasker/ui/ascii"
+	"github.com/Nerver-zip/pomo-tasker/ui/colors"
 	"github.com/spf13/viper"
 )
 
 const (
-	AppName    = "pomo"
+	AppName    = "pomo-tasker"
 	ConfigFile = "pomo.yaml"
 )
 
@@ -162,13 +162,20 @@ func getConfigFile() (string, error) {
 		return ConfigFile, nil
 	}
 
-	// check config directory
-	var configDir string
-	if configDir, err = getConfigDir(); err == nil {
+	// check config directory (~/.config/pomo-tasker/pomo.yaml)
+	if configDir, err := getConfigDir(); err == nil {
 		configPath := filepath.Join(configDir, ConfigFile)
 
 		if _, err := os.Stat(configPath); err == nil {
 			return configPath, nil
+		}
+	}
+
+	// check legacy config directory for backward compatibility (~/.config/pomo/pomo.yaml)
+	if home, err := os.UserHomeDir(); err == nil {
+		legacyPath := filepath.Join(home, ".config", "pomo", ConfigFile)
+		if _, err := os.Stat(legacyPath); err == nil {
+			return legacyPath, nil
 		}
 	}
 
@@ -177,26 +184,31 @@ func getConfigFile() (string, error) {
 
 // returns the config directory for the app
 func getConfigDir() (string, error) {
-	var dir string
+	var baseDir string
 
-	// on linux and macOS, use ~/.config
-	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-		dir = os.Getenv("HOME")
-		if dir == "" {
-			return "", errors.New("$HOME is not defined")
+	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
+		baseDir = xdg
+	} else if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+		home := os.Getenv("HOME")
+		if home == "" {
+			var err error
+			home, err = os.UserHomeDir()
+			if err != nil {
+				return "", errors.New("$HOME is not defined")
+			}
 		}
 
-		dir = filepath.Join(dir, ".config")
+		baseDir = filepath.Join(home, ".config")
 	} else {
 		// on other OSes, use the standard user config directory
 		var err error
-		dir, err = os.UserConfigDir()
+		baseDir, err = os.UserConfigDir()
 		if err != nil {
 			return "", err
 		}
 	}
 
-	return filepath.Join(dir, AppName), nil
+	return filepath.Join(baseDir, AppName), nil
 }
 
 // expands tilde in command arguments to the user's home directory

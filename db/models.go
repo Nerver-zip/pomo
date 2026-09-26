@@ -3,7 +3,7 @@ package db
 import (
 	"time"
 
-	"github.com/Bahaaio/pomo/config"
+	"github.com/Nerver-zip/pomo-tasker/config"
 )
 
 var schema = `

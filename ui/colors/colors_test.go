@@ -3,7 +3,7 @@ package colors_test
 import (
 	"testing"
 
-	"github.com/Bahaaio/pomo/ui/colors"
+	"github.com/Nerver-zip/pomo-tasker/ui/colors"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/stretchr/testify/assert"
 )

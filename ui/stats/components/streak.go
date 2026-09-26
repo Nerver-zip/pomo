@@ -3,7 +3,7 @@ package components
 import (
 	"fmt"
 
-	"github.com/Bahaaio/pomo/db"
+	"github.com/Nerver-zip/pomo-tasker/db"
 )
 
 type Streak struct{}

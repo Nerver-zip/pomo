@@ -1,4 +1,4 @@
-module github.com/Bahaaio/pomo
+module github.com/Nerver-zip/pomo-tasker
 
 go 1.25.0
 

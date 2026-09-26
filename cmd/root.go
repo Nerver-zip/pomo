@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Bahaaio/pomo/config"
+	"github.com/Nerver-zip/pomo-tasker/config"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/gen2brain/beeep"
 	"github.com/spf13/cobra"

@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Bahaaio/pomo/config"
+	"github.com/Nerver-zip/pomo-tasker/config"
 	"github.com/gen2brain/beeep"
 )
 
