@@ -43,6 +43,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case taskpicker.TaskSelectedMsg:
 		m.activeTask = &msg.Task
+		m.sessionSummary.SetFocusedTask(msg.Task.ID, msg.Task.Title)
 		m.sessionState = m.prevState
 		return m, nil
 
@@ -80,6 +81,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.activeTask != nil && m.activeTask.ID == msg.TaskID {
 					m.activeTask.Title = msg.Title
 					m.activeTask.Description = msg.Description
+					m.sessionSummary.SetFocusedTask(msg.TaskID, msg.Title)
 				}
 				tasks, _ := m.taskRepo.ListPending()
 				m.picker.SetTasks(tasks)
@@ -88,6 +90,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				task, err := m.taskRepo.Create(msg.Title, msg.Description)
 				if err == nil {
 					m.activeTask = task
+					m.sessionSummary.SetFocusedTask(task.ID, task.Title)
 				}
 				m.sessionState = m.prevState
 			}

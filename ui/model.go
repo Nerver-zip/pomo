@@ -130,6 +130,9 @@ func (m Model) GetSessionSummary() summary.SessionSummary {
 
 func (m *Model) SetInitialTask(task *db.Task) {
 	m.activeTask = task
+	if task != nil {
+		m.sessionSummary.SetFocusedTask(task.ID, task.Title)
+	}
 }
 
 func (m Model) ActiveTask() *db.Task {

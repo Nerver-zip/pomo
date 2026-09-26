@@ -24,6 +24,46 @@ type SessionSummary struct {
 	totalBreakDuration time.Duration
 
 	isDatabaseUnavailable bool
+
+	focusedTaskID       int
+	focusedTaskTitle    string
+	focusedTaskSessions int
+	focusedTaskDuration time.Duration
+}
+
+// SetFocusedTask records the focused task information for the session exit summary.
+func (t *SessionSummary) SetFocusedTask(id int, title string) {
+	t.focusedTaskID = id
+	t.focusedTaskTitle = title
+}
+
+// AddTaskSession records a completed work session for the focused task.
+func (t *SessionSummary) AddTaskSession(id int, title string, elapsed time.Duration) {
+	t.focusedTaskID = id
+	t.focusedTaskTitle = title
+	t.focusedTaskSessions++
+	t.focusedTaskDuration += elapsed
+}
+
+// AddTaskDuration adds duration to the focused task for short sessions.
+func (t *SessionSummary) AddTaskDuration(duration time.Duration) {
+	t.focusedTaskDuration += duration
+}
+
+func (t SessionSummary) FocusedTaskID() int {
+	return t.focusedTaskID
+}
+
+func (t SessionSummary) FocusedTaskTitle() string {
+	return t.focusedTaskTitle
+}
+
+func (t SessionSummary) FocusedTaskSessions() int {
+	return t.focusedTaskSessions
+}
+
+func (t SessionSummary) FocusedTaskDuration() time.Duration {
+	return t.focusedTaskDuration
 }
 
 // AddSession adds a session to the summary based on the task type and elapsed time.
@@ -52,11 +92,13 @@ func (t *SessionSummary) SetDatabaseUnavailable() {
 	t.isDatabaseUnavailable = true
 }
 
-// Print prints the session summary to the console.
-func (t SessionSummary) Print() {
+// Render builds the formatted session summary as a string.
+func (t SessionSummary) Render() string {
 	if t.totalWorkDuration == 0 && t.totalBreakDuration == 0 {
-		return
+		return ""
 	}
+
+	var b strings.Builder
 
 	workIndicator := "sessions"
 	if t.totalWorkSessions == 1 {
@@ -68,31 +110,55 @@ func (t SessionSummary) Print() {
 		breakIndicator = "session"
 	}
 
-	fmt.Println(messageStyle.Render("Session Summary:"))
+	b.WriteString(messageStyle.Render("Session Summary:") + "\n")
+
+	if t.focusedTaskID > 0 && t.focusedTaskTitle != "" {
+		taskIndicator := "sessions"
+		if t.focusedTaskSessions == 1 {
+			taskIndicator = "session"
+		}
+		b.WriteString(fmt.Sprintf(" Focused Task: #%d %s (%d %s · %v)\n",
+			t.focusedTaskID,
+			t.focusedTaskTitle,
+			t.focusedTaskSessions,
+			taskIndicator,
+			t.focusedTaskDuration,
+		))
+	}
 
 	if t.totalWorkDuration > 0 {
-		fmt.Printf(" Work : %v (%d %s)\n", t.totalWorkDuration, t.totalWorkSessions, workIndicator)
+		b.WriteString(fmt.Sprintf(" Work : %v (%d %s)\n", t.totalWorkDuration, t.totalWorkSessions, workIndicator))
 	}
 
 	if t.totalBreakDuration > 0 {
-		fmt.Printf(" Break: %v (%d %s)\n", t.totalBreakDuration, t.totalBreakSessions, breakIndicator)
+		b.WriteString(fmt.Sprintf(" Break: %v (%d %s)\n", t.totalBreakDuration, t.totalBreakSessions, breakIndicator))
 	}
 
 	if t.totalBreakDuration > 0 && t.totalWorkDuration > 0 {
-		fmt.Println(" Total:", t.totalWorkDuration+t.totalBreakDuration)
+		b.WriteString(fmt.Sprintf(" Total: %v\n", t.totalWorkDuration+t.totalBreakDuration))
 	}
 
 	if t.totalWorkDuration > 0 {
-		t.printProgressBar()
+		b.WriteString(t.renderProgressBar() + "\n")
 	}
 
 	if t.isDatabaseUnavailable {
-		fmt.Println(errorStyle.Render("\n Not saved (database unavailable)"))
+		b.WriteString(errorStyle.Render("\n Not saved (database unavailable)") + "\n")
+	}
+
+	return b.String()
+}
+
+// Print prints the session summary to the console.
+func (t SessionSummary) Print() {
+	rendered := t.Render()
+	if rendered != "" {
+		fmt.Print(rendered)
 	}
 }
 
-// prints a progress bar showing the ratio of work to total time.
-func (t SessionSummary) printProgressBar() {
+// renderProgressBar returns a progress bar showing the ratio of work to total time.
+func (t SessionSummary) renderProgressBar() string {
 	const barWidth = 30
 
 	totalDuration := t.totalWorkDuration + t.totalBreakDuration
@@ -105,5 +171,5 @@ func (t SessionSummary) printProgressBar() {
 		Render(strings.Repeat("█", filledWidth)) +
 		strings.Repeat("░", emptyWidth)
 
-	fmt.Printf("\n [%s] %.0f%% work\n", bar, workRatio*100)
+	return fmt.Sprintf("\n [%s] %.0f%% work", bar, workRatio*100)
 }

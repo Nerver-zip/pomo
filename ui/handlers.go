@@ -312,10 +312,16 @@ func (m *Model) recordSession() {
 	// short sessions extend the current session without incrementing the count
 	if m.isShortSession {
 		m.sessionSummary.AddDuration(m.currentTaskType, m.elapsed)
+		if m.currentTaskType == config.WorkTask && m.activeTask != nil {
+			m.sessionSummary.AddTaskDuration(m.elapsed)
+		}
 		return
 	}
 
 	m.sessionSummary.AddSession(m.currentTaskType, m.elapsed)
+	if m.currentTaskType == config.WorkTask && m.activeTask != nil {
+		m.sessionSummary.AddTaskSession(m.activeTask.ID, m.activeTask.Title, m.elapsed)
+	}
 
 	// return if no database is configured
 	if m.repo == nil {
