@@ -90,6 +90,11 @@ func RunMigrationsList(db *sqlx.DB, migrationList []Migration) error {
 		return fmt.Errorf("database connection cannot be nil")
 	}
 
+	// Always enforce foreign keys
+	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
+		return fmt.Errorf("failed to enable foreign keys: %w", err)
+	}
+
 	// Ensure tracking table exists
 	if _, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS schema_migrations (

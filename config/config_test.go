@@ -267,7 +267,7 @@ func writeAndLoadConfig(t *testing.T, config string) {
 	err := os.WriteFile(configFile, []byte(config), 0o644)
 	assert.NoError(t, err, "Failed to write test config")
 
-	viper.AddConfigPath(tempDir)
+	viper.SetConfigFile(configFile)
 	assert.NoError(t, LoadConfig(), "Failed to load config")
 }
 

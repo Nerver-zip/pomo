@@ -17,6 +17,8 @@ func newTestDB(t *testing.T) *sqlx.DB {
 	db, err := sqlx.Open("sqlite", fmt.Sprintf("file:test_%d?mode=memory&cache=shared", time.Now().UnixNano()))
 	require.NoError(t, err)
 	db.SetMaxOpenConns(1)
+	_, err = db.Exec("PRAGMA foreign_keys = ON;")
+	require.NoError(t, err)
 	t.Cleanup(func() {
 		_ = db.Close()
 	})

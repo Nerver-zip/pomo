@@ -16,20 +16,35 @@ func NewSessionRepo(db *sqlx.DB) *SessionRepo {
 	return &SessionRepo{db: db}
 }
 
-// CreateSession inserts a new session record into the database.
-func (r *SessionRepo) CreateSession(startedAt time.Time, duration time.Duration, sessionType SessionType) error {
+// CreateSession inserts a new session record into the database, optionally linked to a task.
+func (r *SessionRepo) CreateSession(startedAt time.Time, duration time.Duration, sessionType SessionType, taskID *int) error {
 	startedAtStr := startedAt.Format(time.RFC3339)
 
 	if _, err := r.db.Exec(
-		"insert into sessions (started_at, duration, type) values (?, ?, ?);",
+		"insert into sessions (started_at, duration, type, task_id) values (?, ?, ?, ?);",
 		startedAtStr,
 		duration,
 		sessionType,
+		taskID,
 	); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// GetSessionsByTaskID retrieves all sessions associated with a task ID.
+func (r *SessionRepo) GetSessionsByTaskID(taskID int) ([]Session, error) {
+	var sessions []Session
+	err := r.db.Select(
+		&sessions,
+		"SELECT id, task_id, type, duration, started_at FROM sessions WHERE task_id = ? ORDER BY started_at ASC;",
+		taskID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return sessions, nil
 }
 
 // GetAllTimeStats retrieves aggregate statistics across all sessions.
