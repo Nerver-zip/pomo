@@ -31,4 +31,19 @@ jobs:
         run: go vet ./...
 
       - name: Test
-        run: go test ./...
+        run: go test -v -race ./...
+
+      - name: Test Multiplatform Cross-Compilation
+        run: |
+          echo "Checking Linux AMD64 / ARM64 / ARMv7..."
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /dev/null .
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o /dev/null .
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -o /dev/null .
+          echo "Checking Android ARM64..."
+          CGO_ENABLED=0 GOOS=android GOARCH=arm64 go build -o /dev/null .
+          echo "Checking macOS Darwin AMD64 / ARM64..."
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o /dev/null .
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o /dev/null .
+          echo "Checking Windows AMD64 / ARM64..."
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o /dev/null .
+          CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o /dev/null .

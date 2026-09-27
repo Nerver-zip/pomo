@@ -17,9 +17,35 @@ builds:
       - linux
       - windows
       - darwin
+      - android
     goarch:
       - amd64
       - arm64
+      - arm
+    goarm:
+      - "7"
+    ignore:
+      - goos: windows
+        goarch: arm
+      - goos: darwin
+        goarch: arm
+      - goos: android
+        goarch: amd64
+      - goos: android
+        goarch: arm
+    ldflags:
+      - -s -w
+
+  - id: pomo-tasker-android-arm
+    binary: pomo-tasker
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - arm
+    goarm:
+      - "7"
     ldflags:
       - -s -w
 
@@ -49,16 +75,30 @@ changelog:
       order: 999
 
 archives:
-  - formats: [tar.gz]
+  - id: default
+    ids:
+      - pomo-tasker
+    formats: [tar.gz]
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm" }}armv{{ .Arm }}
       {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
       - goos: windows
         formats: [zip]
+    files:
+      - README.md
+      - LICENSE
+      - pomo.yaml
+
+  - id: android-arm
+    ids:
+      - pomo-tasker-android-arm
+    formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_Android_armv7
     files:
       - README.md
       - LICENSE
