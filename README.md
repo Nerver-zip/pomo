@@ -1,4 +1,4 @@
-# pomo-tasker — Timer-First Pomodoro TUI with Persistent Task Context
+# pomo-tasker — Pomodoro TUI with Persistent Task Context
 
 [![Latest Release](https://img.shields.io/github/release/Nerver-zip/pomo-tasker.svg)](https://github.com/Nerver-zip/pomo-tasker/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
