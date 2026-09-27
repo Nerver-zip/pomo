@@ -34,7 +34,7 @@ builds:
       - goos: android
         goarch: arm
     ldflags:
-      - -s -w
+      - -s -w -X github.com/Nerver-zip/pomo-tasker/cmd.version={{.Version}}
 
   - id: pomo-tasker-android-arm
     binary: pomo-tasker
@@ -47,7 +47,7 @@ builds:
     goarm:
       - "7"
     ldflags:
-      - -s -w
+      - -s -w -X github.com/Nerver-zip/pomo-tasker/cmd.version={{.Version}}
 
 changelog:
   sort: asc
@@ -112,6 +112,7 @@ homebrew_casks:
     homepage: https://github.com/Nerver-zip/pomo-tasker
     description: A timer-first Pomodoro TUI with persistent task context.
     license: MIT
+    skip_upload: "{{ if not .Env.GH_PAT }}true{{ else }}auto{{ end }}"
 
     hooks:
       post:
