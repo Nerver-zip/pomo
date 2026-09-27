@@ -112,7 +112,7 @@ homebrew_casks:
     homepage: https://github.com/Nerver-zip/pomo-tasker
     description: A timer-first Pomodoro TUI with persistent task context.
     license: MIT
-    skip_upload: "{{ if not .Env.GH_PAT }}true{{ else }}auto{{ end }}"
+    skip_upload: "true"
 
     hooks:
       post:
@@ -122,7 +122,10 @@ homebrew_casks:
           end
 
 nfpms:
-  - maintainer: Nerver-zip
+  - id: default
+    ids:
+      - pomo-tasker
+    maintainer: Nerver-zip
     description: A timer-first Pomodoro TUI with persistent task context.
     homepage: https://github.com/Nerver-zip/pomo-tasker
     license: MIT
