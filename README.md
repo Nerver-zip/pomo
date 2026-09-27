@@ -3,6 +3,8 @@
 [![Latest Release](https://img.shields.io/github/release/Nerver-zip/pomo-tasker.svg)](https://github.com/Nerver-zip/pomo-tasker/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![Demo](.github/assets/demo.gif)
+
 **pomo-tasker** is a timer-first Pomodoro timer TUI application written in Go with [Bubble Tea](https://github.com/charmbracelet/bubbletea), evolved from [Bahaaio/pomo](https://github.com/Bahaaio/pomo).
 
 It introduces a lightweight, frictionless layer of **persistent tasks linked to Pomodoro sessions** while keeping the large, central timer as the undisputed hero of the interface.
@@ -21,7 +23,7 @@ It introduces a lightweight, frictionless layer of **persistent tasks linked to 
 
 ## ✨ Features
 
-- 🍅 **Hero Timer:** Large ASCII art timer or minimal clean layout.
+- ⏱️ **Hero Timer:** Large ASCII art timer or minimal clean layout.
 - 📋 **Persistent Tasks:** Link focus sessions to concrete tasks in SQLite (`WAL` mode).
 - 🔄 **Session Chaining & Flow Retention:** Active task binding sticks across break intervals.
 - ⚡ **In-TUI Task Management:** Press `t` to pick or create tasks without leaving the timer.
@@ -30,6 +32,19 @@ It introduces a lightweight, frictionless layer of **persistent tasks linked to 
 - 📊 **Exit Summary:** Formatted end-of-session report displaying time spent on your active task.
 - 📈 **Productivity Analytics:** Visual dashboard with heatmaps, streaks, and per-task focus stats.
 - 📁 **Full XDG Compliance:** Transparent data migration from legacy `pomo` databases.
+
+---
+
+## 🎨 Timer Fonts
+
+`pomo-tasker` supports 4 ASCII art fonts for the hero timer, configurable via `asciiArt.font` in `pomo.yaml`:
+
+<!-- prettier-ignore -->
+|              **mono12**              |                  **rebel**                   |
+| :----------------------------------: | :------------------------------------------: |
+| ![mono12](.github/assets/mono12.png) |      ![rebel](.github/assets/rebel.png)      |
+|               **ansi**               |                **ansiShadow**                |
+|   ![ansi](.github/assets/ansi.png)   | ![ansiShadow](.github/assets/ansiShadow.png) |
 
 ---
 
