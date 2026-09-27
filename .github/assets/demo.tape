@@ -21,7 +21,7 @@ Set Height 800
 Sleep 1s
 
 # 1. Quick Task Creation via CLI
-Type "pomo-tasker task add 'Implement OAuth2 auth' -d 'JWT & PKCE flow'"
+Type "pomo-tasker task add 'Read Chapter 4' -d 'Operating systems & memory management'"
 Sleep 500ms
 Enter
 Sleep 1.5s
@@ -49,7 +49,7 @@ Sleep 2s
 # 5. Create new task via In-TUI Modal (n)
 Type "n"
 Sleep 1s
-Type "Design landing page"
+Type "Review study flashcards"
 Sleep 800ms
 Enter
 Sleep 3s
