@@ -186,12 +186,12 @@ func txColumnExists(tx *sqlx.Tx, table, column string) (bool, error) {
 
 	for rows.Next() {
 		var (
-			cid      int
-			name     string
-			colType  string
-			notNull  int
-			dfltVal  sql.NullString
-			pk       int
+			cid     int
+			name    string
+			colType string
+			notNull int
+			dfltVal sql.NullString
+			pk      int
 		)
 		if err := rows.Scan(&cid, &name, &colType, &notNull, &dfltVal, &pk); err != nil {
 			return false, err

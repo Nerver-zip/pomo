@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	ErrTaskNotFound    = errors.New("task not found")
-	ErrEmptyTaskTitle  = errors.New("task title cannot be empty")
+	ErrTaskNotFound   = errors.New("task not found")
+	ErrEmptyTaskTitle = errors.New("task title cannot be empty")
 )
 
 type TaskStatus string

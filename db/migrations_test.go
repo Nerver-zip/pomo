@@ -79,11 +79,11 @@ func TestMigrations_LegacyPomoDatabaseConvergence(t *testing.T) {
 
 	// Verify legacy sessions preserved
 	type LegacySession struct {
-		ID        int     `db:"id"`
-		Type      string  `db:"type"`
-		Duration  int64   `db:"duration"`
-		StartedAt string  `db:"started_at"`
-		TaskID    *int    `db:"task_id"`
+		ID        int    `db:"id"`
+		Type      string `db:"type"`
+		Duration  int64  `db:"duration"`
+		StartedAt string `db:"started_at"`
+		TaskID    *int   `db:"task_id"`
 	}
 
 	var sessions []LegacySession
