@@ -4,9 +4,9 @@ package stats
 import (
 	"errors"
 
-	"github.com/Nerver-zip/pomo-tasker/db"
-	"github.com/Nerver-zip/pomo-tasker/ui/colors"
-	"github.com/Nerver-zip/pomo-tasker/ui/stats/components"
+	"github.com/Nerver-zip/pomo/db"
+	"github.com/Nerver-zip/pomo/ui/colors"
+	"github.com/Nerver-zip/pomo/ui/stats/components"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"

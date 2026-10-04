@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/Nerver-zip/pomo-tasker/cmd"
+	"github.com/Nerver-zip/pomo/cmd"
 )
 
 func main() {

@@ -1,11 +1,11 @@
-# pomo-tasker — Pomodoro TUI with Persistent Task Context
+# pomo — Pomodoro TUI with Persistent Task Context
 
-[![Latest Release](https://img.shields.io/github/release/Nerver-zip/pomo-tasker.svg)](https://github.com/Nerver-zip/pomo-tasker/releases/latest)
+[![Latest Release](https://img.shields.io/github/release/Nerver-zip/pomo.svg)](https://github.com/Nerver-zip/pomo/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ![Demo](.github/assets/demo.gif)
 
-**pomo-tasker** is a timer-first Pomodoro timer TUI application written in Go with [Bubble Tea](https://github.com/charmbracelet/bubbletea), evolved from [Bahaaio/pomo](https://github.com/Bahaaio/pomo).
+**pomo** is a timer-first Pomodoro timer TUI application written in Go with [Bubble Tea](https://github.com/charmbracelet/bubbletea), evolved from [Bahaaio/pomo](https://github.com/Bahaaio/pomo).
 
 It introduces a lightweight, frictionless layer of **persistent tasks linked to Pomodoro sessions** while keeping the large, central timer as the undisputed hero of the interface.
 
@@ -31,13 +31,13 @@ It introduces a lightweight, frictionless layer of **persistent tasks linked to 
 - 🔔 **Desktop Notifications:** Cross-platform notifications when sessions finish.
 - 📊 **Exit Summary:** Formatted end-of-session report displaying time spent on your active task.
 - 📈 **Productivity Analytics:** Visual dashboard with heatmaps, streaks, and per-task focus stats.
-- 📁 **Full XDG Compliance:** Transparent data migration from legacy `pomo` databases.
+- 📁 **Full XDG Compliance:** Seamless schema migration for existing databases.
 
 ---
 
 ## 🎨 Timer Fonts
 
-`pomo-tasker` supports 4 ASCII art fonts for the hero timer, configurable via `asciiArt.font` in `pomo.yaml`:
+`pomo` supports 4 ASCII art fonts for the hero timer, configurable via `asciiArt.font` in `pomo.yaml`:
 
 <!-- prettier-ignore -->
 |              **mono12**              |                  **rebel**                   |
@@ -75,7 +75,7 @@ pomo task start 1
 
 ## 📋 Task Management CLI
 
-`pomo-tasker` includes a dedicated `task` subcommand suite:
+`pomo` includes a dedicated `task` subcommand suite:
 
 ```bash
 # Add a new task
@@ -139,7 +139,7 @@ pomo stats -T 1
 
 ## 📊 Session Exit Summary
 
-When quitting or completing sessions, `pomo-tasker` prints an informative summary:
+When quitting or completing sessions, `pomo` prints an informative summary:
 
 ```text
 Session Summary:
@@ -157,19 +157,18 @@ Session Summary:
 
 ### Configuration File
 
-`pomo-tasker` looks for its configuration file in:
+`pomo` looks for its configuration file in:
 1. `./pomo.yaml` (Current directory)
-2. `$XDG_CONFIG_HOME/pomo-tasker/pomo.yaml` (or `~/.config/pomo-tasker/pomo.yaml`)
-3. Legacy fallback: `~/.config/pomo/pomo.yaml`
+2. `$XDG_CONFIG_HOME/pomo/pomo.yaml` (or `~/.config/pomo/pomo.yaml`)
 
 See [pomo.yaml](pomo.yaml) for available options (ASCII art fonts, notifications, hooks).
 
 ### Database & Migrations
 
 The SQLite database is stored at:
-- `$XDG_STATE_HOME/pomo-tasker/pomo-tasker.db` (or `~/.local/state/pomo-tasker/pomo-tasker.db`)
+- `$XDG_STATE_HOME/pomo/pomo.db` (or `~/.local/state/pomo/pomo.db`)
 
-**Seamless Upgrade:** If you have an existing database from `pomo` at `~/.local/state/pomo/pomo.db`, `pomo-tasker` automatically copies it on first launch and applies sequential schema migrations without touching or colliding with upstream data.
+**Seamless Migrations:** Existing databases from older versions of `pomo` are automatically and safely migrated on first launch, adding task support without touching or losing any historical session data.
 
 ---
 
@@ -178,27 +177,27 @@ The SQLite database is stored at:
 ### From Source
 
 ```bash
-git clone https://github.com/Nerver-zip/pomo-tasker
-cd pomo-tasker
-go build -o pomo-tasker .
+git clone https://github.com/Nerver-zip/pomo
+cd pomo
+go build -o pomo .
 ```
 
 ### Go Install
 
 ```bash
-go install github.com/Nerver-zip/pomo-tasker@latest
+go install github.com/Nerver-zip/pomo@latest
 ```
 
 ### Nix Flake
 
 ```bash
-nix run github:Nerver-zip/pomo-tasker
+nix run github:Nerver-zip/pomo
 ```
 
 ---
 
 ## 📄 License & Attribution
 
-`pomo-tasker` is licensed under the [MIT License](LICENSE).
+`pomo` is licensed under the [MIT License](LICENSE).
 
 This project is a fork and evolution of [Bahaaio/pomo](https://github.com/Bahaaio/pomo), originally created by Bahaa Mohamed. We are deeply grateful for their elegant TUI foundation.

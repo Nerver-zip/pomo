@@ -1,6 +1,6 @@
 Output .github/assets/demo.gif
 
-Require pomo-tasker
+Require pomo
 
 Set Padding 20
 Set Margin 20
@@ -21,13 +21,13 @@ Set Height 800
 Sleep 1s
 
 # 1. Quick Task Creation via CLI
-Type "pomo-tasker task add 'Read Chapter 4' -d 'Operating systems & memory management'"
+Type "pomo task add 'Read Chapter 4' -d 'Operating systems & memory management'"
 Sleep 500ms
 Enter
 Sleep 1.5s
 
-# 2. Launch pomo-tasker attached to task #1
-Type "pomo-tasker --task 1 5m"
+# 2. Launch pomo attached to task #1
+Type "pomo --task 1 5m"
 Sleep 500ms
 Enter
 Sleep 3s

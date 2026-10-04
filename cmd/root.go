@@ -7,27 +7,27 @@ import (
 	"log"
 	"os"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
+	"github.com/Nerver-zip/pomo/config"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/gen2brain/beeep"
 	"github.com/spf13/cobra"
 )
 
-var version = "1.2.1"
+var version = "1.3.1"
 
 var rootCmd = &cobra.Command{
-	Use:     "pomo-tasker [work duration] [break duration]",
+	Use:     "pomo [work duration] [break duration]",
 	Short:   "start a pomodoro work session",
 	Version: version,
-	Long: `pomo-tasker is a timer-first Pomodoro timer TUI with persistent task context
+	Long: `pomo is a timer-first Pomodoro timer TUI with persistent task context
 
 Start a work session with the default duration from your config file,
 or specify a custom duration. The timer shows a progress bar and sends
 desktop notifications when complete.`,
-	Example: `  pomo-tasker                   # Start work session
-  pomo-tasker 1h15m             # Start 1 hour 15 minute session
-  pomo-tasker 45m 15m           # Start 45 minute work session with 15 minute break
-  pomo-tasker --task 1 25m      # Start work session linked to task #1`,
+	Example: `  pomo                   # Start work session
+  pomo 1h15m             # Start 1 hour 15 minute session
+  pomo 45m 15m           # Start 45 minute work session with 15 minute break
+  pomo --task 1 25m      # Start work session linked to task #1`,
 
 	Args: cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {

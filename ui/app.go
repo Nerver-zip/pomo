@@ -2,9 +2,9 @@
 package ui
 
 import (
-	"github.com/Nerver-zip/pomo-tasker/ui/confirm"
-	"github.com/Nerver-zip/pomo-tasker/ui/taskform"
-	"github.com/Nerver-zip/pomo-tasker/ui/taskpicker"
+	"github.com/Nerver-zip/pomo/ui/confirm"
+	"github.com/Nerver-zip/pomo/ui/taskform"
+	"github.com/Nerver-zip/pomo/ui/taskpicker"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"

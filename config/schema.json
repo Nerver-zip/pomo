@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/Bahaaio/pomo/main/schema/pomo-config.schema.json",
+  "$id": "https://raw.githubusercontent.com/Nerver-zip/pomo/main/schema/pomo-config.schema.json",
   "title": "Pomo Configuration",
   "description": "Configuration schema for pomo - Terminal Pomodoro Timer",
   "type": "object",

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
+	"github.com/Nerver-zip/pomo/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

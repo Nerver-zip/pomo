@@ -1,6 +1,6 @@
 version: 2
 
-project_name: pomo-tasker
+project_name: pomo
 
 before:
   hooks:
@@ -9,8 +9,8 @@ before:
     - go test ./...
 
 builds:
-  - id: pomo-tasker
-    binary: pomo-tasker
+  - id: pomo
+    binary: pomo
     env:
       - CGO_ENABLED=0
     goos:
@@ -34,10 +34,10 @@ builds:
       - goos: android
         goarch: arm
     ldflags:
-      - -s -w -X github.com/Nerver-zip/pomo-tasker/cmd.version={{.Version}}
+      - -s -w -X github.com/Nerver-zip/pomo/cmd.version={{.Version}}
 
-  - id: pomo-tasker-android-arm
-    binary: pomo-tasker
+  - id: pomo-android-arm
+    binary: pomo
     env:
       - CGO_ENABLED=0
     goos:
@@ -47,7 +47,7 @@ builds:
     goarm:
       - "7"
     ldflags:
-      - -s -w -X github.com/Nerver-zip/pomo-tasker/cmd.version={{.Version}}
+      - -s -w -X github.com/Nerver-zip/pomo/cmd.version={{.Version}}
 
 changelog:
   sort: asc
@@ -77,7 +77,7 @@ changelog:
 archives:
   - id: default
     ids:
-      - pomo-tasker
+      - pomo
     formats: [tar.gz]
     name_template: >-
       {{ .ProjectName }}_
@@ -95,7 +95,7 @@ archives:
 
   - id: android-arm
     ids:
-      - pomo-tasker-android-arm
+      - pomo-android-arm
     formats: [tar.gz]
     name_template: >-
       {{ .ProjectName }}_Android_armv7
@@ -105,11 +105,11 @@ archives:
       - pomo.yaml
 
 homebrew_casks:
-  - name: pomo-tasker
+  - name: pomo
     repository:
       owner: Nerver-zip
-      name: homebrew-pomo-tasker
-    homepage: https://github.com/Nerver-zip/pomo-tasker
+      name: homebrew-pomo
+    homepage: https://github.com/Nerver-zip/pomo
     description: A timer-first Pomodoro TUI with persistent task context.
     license: MIT
     skip_upload: "true"
@@ -118,16 +118,16 @@ homebrew_casks:
       post:
         install: |
           if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/pomo-tasker"]
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/pomo"]
           end
 
 nfpms:
   - id: default
     ids:
-      - pomo-tasker
+      - pomo
     maintainer: Nerver-zip
     description: A timer-first Pomodoro TUI with persistent task context.
-    homepage: https://github.com/Nerver-zip/pomo-tasker
+    homepage: https://github.com/Nerver-zip/pomo
     license: MIT
     formats:
       - deb
@@ -136,14 +136,14 @@ nfpms:
 release:
   github:
     owner: Nerver-zip
-    name: pomo-tasker
+    name: pomo
   name_template: "v{{.Version}}"
   footer: |
     ## Install
 
     ### Go
     ```bash
-    go install github.com/Nerver-zip/pomo-tasker@latest
+    go install github.com/Nerver-zip/pomo@latest
     ```
 
     ### Download Binary
