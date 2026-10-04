@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
+	"github.com/Bahaaio/pomo/config"
 )
 
 var (

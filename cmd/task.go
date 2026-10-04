@@ -7,8 +7,8 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
-	"github.com/Nerver-zip/pomo-tasker/db"
+	"github.com/Bahaaio/pomo/config"
+	"github.com/Bahaaio/pomo/db"
 	"github.com/spf13/cobra"
 )
 

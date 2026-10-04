@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
-	"github.com/Nerver-zip/pomo-tasker/db"
-	"github.com/Nerver-zip/pomo-tasker/ui"
+	"github.com/Bahaaio/pomo/config"
+	"github.com/Bahaaio/pomo/db"
+	"github.com/Bahaaio/pomo/ui"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )

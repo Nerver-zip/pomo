@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
+	"github.com/Bahaaio/pomo/config"
 	"github.com/spf13/cobra"
 )
 

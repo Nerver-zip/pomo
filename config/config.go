@@ -13,13 +13,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Nerver-zip/pomo-tasker/ui/ascii"
-	"github.com/Nerver-zip/pomo-tasker/ui/colors"
+	"github.com/Bahaaio/pomo/ui/ascii"
+	"github.com/Bahaaio/pomo/ui/colors"
 	"github.com/spf13/viper"
 )
 
 const (
-	AppName    = "pomo-tasker"
+	AppName    = "pomo"
 	ConfigFile = "pomo.yaml"
 )
 
@@ -162,20 +162,12 @@ func getConfigFile() (string, error) {
 		return ConfigFile, nil
 	}
 
-	// check config directory (~/.config/pomo-tasker/pomo.yaml)
+	// check config directory (~/.config/pomo/pomo.yaml)
 	if configDir, err := getConfigDir(); err == nil {
 		configPath := filepath.Join(configDir, ConfigFile)
 
 		if _, err := os.Stat(configPath); err == nil {
 			return configPath, nil
-		}
-	}
-
-	// check legacy config directory for backward compatibility (~/.config/pomo/pomo.yaml)
-	if home, err := os.UserHomeDir(); err == nil {
-		legacyPath := filepath.Join(home, ".config", "pomo", ConfigFile)
-		if _, err := os.Stat(legacyPath); err == nil {
-			return legacyPath, nil
 		}
 	}
 

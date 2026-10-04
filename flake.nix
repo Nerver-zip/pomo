@@ -28,7 +28,7 @@
         { pkgs }:
         {
           default = pkgs.buildGoModule {
-            pname = "pomo-tasker";
+            pname = "pomo";
             version = "1.2.1";
 
             src = ./.;
@@ -42,10 +42,10 @@
 
             meta = with pkgs.lib; {
               description = "Timer-first Pomodoro TUI with persistent task context, progress bar, desktop notifications, and focus statistics";
-              homepage = "https://github.com/Nerver-zip/pomo-tasker";
+              homepage = "https://github.com/Bahaaio/pomo";
               license = licenses.mit;
               platforms = platforms.linux ++ platforms.darwin;
-              mainProgram = "pomo-tasker";
+              mainProgram = "pomo";
             };
           };
         }

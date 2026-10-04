@@ -3,13 +3,12 @@ package db
 
 import (
 	"errors"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
+	"github.com/Bahaaio/pomo/config"
 	"github.com/jmoiron/sqlx"
 	_ "modernc.org/sqlite"
 )
@@ -17,7 +16,7 @@ import (
 const DBFile = config.AppName + ".db"
 
 // Connect connects to the SQLite database,
-// creates the necessary directories, imports legacy pomo data if needed,
+// creates the necessary directories,
 // configures SQLite pragmas (WAL, foreign_keys, busy_timeout),
 // and performs migrations.
 func Connect() (*sqlx.DB, error) {
@@ -34,9 +33,6 @@ func Connect() (*sqlx.DB, error) {
 	}
 
 	dbPath := filepath.Join(dbDir, DBFile)
-
-	// One-time automatic import of legacy pomo.db if pomo-tasker.db does not exist
-	importLegacyDBIfNeeded(dbPath)
 
 	db, err := sqlx.Open("sqlite", dbPath)
 	if err != nil {
@@ -73,53 +69,6 @@ func Connect() (*sqlx.DB, error) {
 	}
 
 	return db, nil
-}
-
-// importLegacyDBIfNeeded checks if pomo-tasker.db is missing and copies legacy pomo.db if found.
-func importLegacyDBIfNeeded(destPath string) {
-	if _, err := os.Stat(destPath); err == nil {
-		return // dest already exists
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return
-	}
-
-	var candidates []string
-	if xdgState := os.Getenv("XDG_STATE_HOME"); xdgState != "" {
-		candidates = append(candidates, filepath.Join(xdgState, "pomo", "pomo.db"))
-	}
-	candidates = append(candidates, filepath.Join(home, ".local", "state", "pomo", "pomo.db"))
-
-	for _, legacyPath := range candidates {
-		if info, err := os.Stat(legacyPath); err == nil && !info.IsDir() {
-			log.Printf("importing legacy pomo database from %s to %s", legacyPath, destPath)
-			if err := copyFile(legacyPath, destPath); err != nil {
-				log.Printf("failed to copy legacy pomo database: %v", err)
-			}
-			return
-		}
-	}
-}
-
-func copyFile(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	if _, err := io.Copy(out, in); err != nil {
-		return err
-	}
-	return out.Sync()
 }
 
 // returns the path to the db directory respecting XDG specification

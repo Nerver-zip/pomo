@@ -3,8 +3,8 @@ package taskform
 import (
 	"strings"
 
-	"github.com/Nerver-zip/pomo-tasker/db"
-	"github.com/Nerver-zip/pomo-tasker/ui/colors"
+	"github.com/Bahaaio/pomo/db"
+	"github.com/Bahaaio/pomo/ui/colors"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"

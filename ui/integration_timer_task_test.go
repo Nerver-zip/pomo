@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
-	"github.com/Nerver-zip/pomo-tasker/db"
-	"github.com/Nerver-zip/pomo-tasker/ui/taskpicker"
+	"github.com/Bahaaio/pomo/config"
+	"github.com/Bahaaio/pomo/db"
+	"github.com/Bahaaio/pomo/ui/taskpicker"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/jmoiron/sqlx"

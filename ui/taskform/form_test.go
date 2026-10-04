@@ -3,7 +3,7 @@ package taskform
 import (
 	"testing"
 
-	"github.com/Nerver-zip/pomo-tasker/db"
+	"github.com/Bahaaio/pomo/db"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

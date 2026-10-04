@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
-	"github.com/Nerver-zip/pomo-tasker/ui/summary"
+	"github.com/Bahaaio/pomo/config"
+	"github.com/Bahaaio/pomo/ui/summary"
 	"github.com/stretchr/testify/assert"
 )
 

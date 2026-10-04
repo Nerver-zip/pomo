@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
-	"github.com/Nerver-zip/pomo-tasker/ui/ascii"
-	"github.com/Nerver-zip/pomo-tasker/ui/colors"
+	"github.com/Bahaaio/pomo/config"
+	"github.com/Bahaaio/pomo/ui/ascii"
+	"github.com/Bahaaio/pomo/ui/colors"
 	"github.com/charmbracelet/lipgloss"
 )
 

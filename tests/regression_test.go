@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Nerver-zip/pomo-tasker/cmd"
-	"github.com/Nerver-zip/pomo-tasker/config"
-	"github.com/Nerver-zip/pomo-tasker/db"
-	"github.com/Nerver-zip/pomo-tasker/ui"
+	"github.com/Bahaaio/pomo/cmd"
+	"github.com/Bahaaio/pomo/config"
+	"github.com/Bahaaio/pomo/db"
+	"github.com/Bahaaio/pomo/ui"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -160,7 +160,7 @@ func TestRegression_LegacyDatabaseMigration(t *testing.T) {
 	require.NoError(t, err)
 	_ = legacyDB.Close()
 
-	// 2. Open via pomo-tasker and apply migrations
+	// 2. Open via pomo and apply migrations
 	upgradedDB, err := sqlx.Open("sqlite", dbPath)
 	require.NoError(t, err)
 	defer upgradedDB.Close()
