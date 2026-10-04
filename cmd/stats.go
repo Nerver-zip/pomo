@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/Nerver-zip/pomo-tasker/ui/stats"
+	"github.com/Nerver-zip/pomo/ui/stats"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )

@@ -1,4 +1,4 @@
-Require pomo-tasker
+Require pomo
 
 Set Padding 20
 Set Margin 20
@@ -18,7 +18,7 @@ Hide
 Type "sed -i 's/font:.*/font: mono12/' pomo.yaml"
 Enter
 Show
-Type "pomo-tasker 25m"
+Type "pomo 25m"
 Enter
 Sleep 1.5s
 Screenshot .github/assets/mono12.png
@@ -30,7 +30,7 @@ Hide
 Type "sed -i 's/font:.*/font: rebel/' pomo.yaml"
 Enter
 Show
-Type "pomo-tasker 25m"
+Type "pomo 25m"
 Enter
 Sleep 1.5s
 Screenshot .github/assets/rebel.png
@@ -42,7 +42,7 @@ Hide
 Type "sed -i 's/font:.*/font: ansi/' pomo.yaml"
 Enter
 Show
-Type "pomo-tasker 25m"
+Type "pomo 25m"
 Enter
 Sleep 1.5s
 Screenshot .github/assets/ansi.png
@@ -54,7 +54,7 @@ Hide
 Type "sed -i 's/font:.*/font: ansiShadow/' pomo.yaml"
 Enter
 Show
-Type "pomo-tasker 25m"
+Type "pomo 25m"
 Enter
 Sleep 1.5s
 Screenshot .github/assets/ansiShadow.png

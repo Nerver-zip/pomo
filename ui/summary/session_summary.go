@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Nerver-zip/pomo-tasker/config"
-	"github.com/Nerver-zip/pomo-tasker/ui/colors"
+	"github.com/Nerver-zip/pomo/config"
+	"github.com/Nerver-zip/pomo/ui/colors"
 	"github.com/charmbracelet/lipgloss"
 )
 

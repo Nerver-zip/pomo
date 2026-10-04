@@ -16,7 +16,7 @@ Thank you for your interest in contributing to pomo!
 3. **Add the upstream remote:**
 
    ```bash
-   git remote add upstream https://github.com/Bahaaio/pomo.git
+   git remote add upstream https://github.com/Nerver-zip/pomo.git
    ```
 
 4. **Install dependencies:**
@@ -187,7 +187,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) for clear, stru
    git push origin feature/your-feature-name
    ```
 
-2. **Create a PR** on GitHub from your fork to `Bahaaio/pomo:main`
+2. **Create a PR** on GitHub from your fork to `Nerver-zip/pomo:main`
 
 3. **Fill out the PR description** with:
    - What changes you made
@@ -202,7 +202,7 @@ Releases are automated using GoReleaser when a version tag is pushed.
 ### Version Tags
 
 - Follow semantic versioning: `v<major>.<minor>.<patch>`
-- Current version: `v0.9.0`
+- Current version: `v1.3.1`
 
 ## License
 
